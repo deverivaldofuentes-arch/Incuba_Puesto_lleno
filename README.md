@@ -22,7 +22,7 @@ Asegurate de tener instalado en tu sistema:
 ### Paso 1 - Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO> Puesto_lleno
+git clone https://github.com/deverivaldofuentes-arch/Incuba_Puesto_lleno.git
 cd Puesto_lleno
 ```
 

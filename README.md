@@ -1,84 +1,242 @@
-# 🚀 Puesto_lleno - Plataforma Backend (Laravel 10 + PostgreSQL + Docker)
+# Puesto_lleno - Backend Laravel 10 + PostgreSQL + Docker
 
-Proyecto **Puesto_lleno** basado en **Laravel 10**, totalmente dockerizado con **PostgreSQL 15**, diseñado para trabajo en equipo sin conflictos de puertos ni servicios.
-
----
-
-## 📋 Requisitos Previos
-
-1. **Docker Desktop** (con soporte WSL 2 activado en Windows) o **Docker Engine** + **Docker Compose** v2 en Linux/macOS.
-2. **Git**.
-
-> 💡 **Nota:** No necesitas instalar PHP, Composer ni PostgreSQL localmente en tu sistema. Todo se ejecuta dentro de contenedores aislados.
+Proyecto **100% dockerizado** para trabajo en equipo. No necesitas instalar PHP, Composer ni PostgreSQL en tu maquina local.
 
 ---
 
-## 🚀 Inicio Rápido (Paso a Paso)
+## Requisitos Previos
 
-### 1. Clonar el repositorio
+Asegurate de tener instalado en tu sistema:
+
+| Herramienta     | Version minima | Descarga                                      |
+|-----------------|----------------|-----------------------------------------------|
+| Docker Desktop  | 4.x            | https://www.docker.com/products/docker-desktop |
+| Git             | 2.x            | https://git-scm.com                           |
+
+> IMPORTANTE Windows: Activa la integracion con WSL 2 en Docker Desktop > Settings > Resources > WSL Integration.
+
+---
+
+## Configuracion Inicial (Solo la primera vez)
+
+### Paso 1 - Clonar el repositorio
+
 ```bash
 git clone <URL_DEL_REPOSITORIO> Puesto_lleno
 cd Puesto_lleno
 ```
 
-### 2. Configurar variables de entorno
+### Paso 2 - Copiar el archivo de entorno
+
 ```bash
 cp .env.example .env
 ```
 
-*(Opcional)* Si en tu máquina local ya tienes un servicio ocupando el puerto `8000` o `5432`, edita en tu `.env`:
-```env
-APP_PORT=8002
-FORWARD_DB_PORT=5434
-```
+> Nota: Este proyecto usa los puertos **8001** (App) y **5433** (BD) por defecto para que no choque con otros proyectos como Ahorrazo.
+> Si necesitas cambiarlos, edita tu `.env`:
+>
+> ```env
+> APP_PORT=8002        # Puerto para la app
+> FORWARD_DB_PORT=5434 # Puerto para PostgreSQL
+> ```
 
-### 3. Construir y encender los contenedores
+### Paso 3 - Construir e iniciar los contenedores
+
 ```bash
 docker compose up -d --build
 ```
 
-### 4. Generar clave de la aplicación y ejecutar migraciones
-```bash
-# Generar APP_KEY
-docker compose exec app php artisan key:generate
+Este comando descarga las imagenes, construye el contenedor PHP y levanta la base de datos PostgreSQL.
+La primera vez puede tardar unos minutos dependiendo de tu conexion a internet.
 
-# Ejecutar migraciones de PostgreSQL
+### Paso 4 - Generar clave de la aplicacion
+
+```bash
+docker compose exec app php artisan key:generate
+```
+
+### Paso 5 - Ejecutar las migraciones
+
+```bash
 docker compose exec app php artisan migrate
 ```
 
-### 5. Verificar funcionamiento
-Abre tu navegador e ingresa a: **[http://localhost:8000](http://localhost:8000)** (o el puerto configurado en `APP_PORT`).
+### Paso 6 - Verificar que funciona
+
+Abre tu navegador en: **http://localhost:8001**
+
+Si configuraste un puerto diferente, usa: `http://localhost:{APP_PORT}`
 
 ---
 
-## 🛠️ Comandos de Desarrollo Diario
+## Comandos del Dia a Dia
 
-| Acción | Comando |
-|---|---|
-| **Iniciar servicios** | `docker compose up -d` |
-| **Detener servicios** | `docker compose down` |
-| **Ver logs en tiempo real** | `docker compose logs -f` |
-| **Ver estado de contenedores** | `docker compose ps` |
-| **Ejecutar comandos Artisan** | `docker compose exec app php artisan <comando>` |
-| **Ejecutar migraciones + seeders** | `docker compose exec app php artisan migrate:fresh --seed` |
-| **Ejecutar Composer** | `docker compose exec app composer <comando>` |
-| **Ejecutar Tests** | `docker compose exec app php artisan test` |
-| **Entrar al Shell del contenedor** | `docker compose exec app bash` |
-| **Consola de PostgreSQL (psql)** | `docker compose exec db psql -U puesto_lleno -d puesto_lleno` |
+### Gestion de contenedores
+
+```bash
+# Iniciar los servicios (sin reconstruir)
+docker compose up -d
+
+# Detener los servicios (los datos se conservan)
+docker compose down
+
+# Reconstruir contenedores tras cambios en Dockerfile
+docker compose up -d --build
+
+# Ver el estado de los contenedores
+docker compose ps
+
+# Ver los logs en tiempo real (todos los servicios)
+docker compose logs -f
+
+# Ver los logs solo del contenedor de la app
+docker compose logs -f app
+
+# Ver los logs solo de la base de datos
+docker compose logs -f db
+```
+
+### Comandos de Laravel (Artisan)
+
+```bash
+# Ejecutar migraciones
+docker compose exec app php artisan migrate
+
+# Revertir y volver a correr todas las migraciones con seeders
+docker compose exec app php artisan migrate:fresh --seed
+
+# Crear un nuevo modelo con migracion
+docker compose exec app php artisan make:model NombreModelo -m
+
+# Crear un controlador resource
+docker compose exec app php artisan make:controller NombreController --resource
+
+# Crear un request de validacion
+docker compose exec app php artisan make:request NombreRequest
+
+# Ver todas las rutas registradas
+docker compose exec app php artisan route:list
+
+# Limpiar cache de la aplicacion
+docker compose exec app php artisan cache:clear
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan route:clear
+
+# Ejecutar los tests
+docker compose exec app php artisan test
+```
+
+### Gestion de dependencias (Composer)
+
+```bash
+# Instalar un nuevo paquete
+docker compose exec app composer require vendor/paquete
+
+# Instalar un paquete de desarrollo
+docker compose exec app composer require vendor/paquete --dev
+
+# Actualizar dependencias
+docker compose exec app composer update
+```
+
+### Acceso directo a los contenedores
+
+```bash
+# Entrar al bash del contenedor de la aplicacion
+docker compose exec app bash
+
+# Entrar a la consola de PostgreSQL (psql)
+docker compose exec db psql -U puesto_lleno -d puesto_lleno
+```
 
 ---
 
-## 🔒 Aislamiento y Estructura de Contenedores
+## Arquitectura de Contenedores
 
-- **Contenedor App:** `puesto_lleno_app` (PHP 8.2 CLI + PDO PostgreSQL + Composer).
-- **Contenedor BD:** `puesto_lleno_db` (PostgreSQL 15 Alpine).
-- **Red aislada:** `puesto_lleno_network` (Evita conflictos con otros proyectos Docker).
-- **Volumen de Datos:** `puesto_lleno_postgres_data` (Garantiza que la información de PostgreSQL persista tras reiniciar la PC o los contenedores).
+```
+  [Tu Navegador / Herramienta]
+          |
+     localhost:8001
+          |
+  [ puesto_lleno_app ]    <-- PHP 8.2 CLI + PDO + Composer
+          |
+     (red interna: puesto_lleno_network)
+          |
+  [ puesto_lleno_db ]     <-- PostgreSQL 15 Alpine
+          |
+  [ puesto_lleno_postgres_data ]  <-- Volumen persistente
+```
+
+| Recurso            | Nombre                       | Descripcion                          |
+|--------------------|------------------------------|--------------------------------------|
+| Contenedor App     | puesto_lleno_app             | PHP 8.2 + PDO PostgreSQL + Composer  |
+| Contenedor BD      | puesto_lleno_db              | PostgreSQL 15 Alpine                 |
+| Red Docker         | puesto_lleno_network         | Red aislada, sin conflictos          |
+| Volumen de datos   | puesto_lleno_postgres_data   | Persistencia de datos PostgreSQL     |
 
 ---
 
-## 🤝 Buenas Prácticas para el Equipo
+## Variables de Entorno Importantes
 
-- **No subir el archivo `.env` al repositorio.** Cada desarrollador mantiene su propio `.env`.
-- Si agregas una nueva variable de entorno al proyecto, regístrala también en `.env.example`.
-- Para instalar nuevos paquetes PHP: `docker compose exec app composer require <paquete>`.
+| Variable          | Valor por defecto | Descripcion                              |
+|-------------------|-------------------|------------------------------------------|
+| APP_PORT          | 8001              | Puerto local para acceder a la app       |
+| FORWARD_DB_PORT   | 5433              | Puerto local para conectar a PostgreSQL  |
+| DB_DATABASE       | puesto_lleno      | Nombre de la base de datos               |
+| DB_USERNAME       | puesto_lleno      | Usuario de PostgreSQL                    |
+| DB_PASSWORD       | puesto_lleno      | Contrasena de PostgreSQL                 |
+| APP_DEBUG         | true              | Muestra errores detallados (solo local)  |
+
+> ATENCION En produccion: cambia `APP_ENV=production`, `APP_DEBUG=false` y usa contrasenas seguras.
+
+---
+
+## Persistencia de Datos
+
+Los datos de PostgreSQL se guardan en el volumen `puesto_lleno_postgres_data`.
+
+```bash
+# Detener servicios SIN borrar datos
+docker compose down
+
+# Detener servicios Y borrar todos los datos (cuidado)
+docker compose down -v
+```
+
+---
+
+## Buenas Practicas del Equipo
+
+1. **Nunca subas `.env` al repositorio.** Cada miembro tiene su propio `.env` local.
+2. Siempre que agregues una variable nueva al `.env`, agregala tambien al `.env.example` (sin valor sensible).
+3. Usa `docker compose exec app composer require` para instalar paquetes desde el contenedor.
+4. Antes de hacer push, corre `docker compose exec app php artisan test` para verificar que los tests pasen.
+5. Si un companero agrega una nueva migracion, ejecuta `docker compose exec app php artisan migrate` para actualizarte.
+
+---
+
+## Solucion de Problemas Frecuentes
+
+**El puerto 8001 ya esta en uso:**
+```bash
+# En tu .env, cambia:
+APP_PORT=8002
+# Luego reinicia:
+docker compose down && docker compose up -d
+```
+
+**Error de permisos en storage o bootstrap/cache:**
+```bash
+docker compose exec app chmod -R 775 storage bootstrap/cache
+```
+
+**Quiero empezar la base de datos desde cero:**
+```bash
+docker compose exec app php artisan migrate:fresh --seed
+```
+
+**Ver que esta pasando dentro de los contenedores:**
+```bash
+docker compose logs -f app
+docker compose logs -f db
+```

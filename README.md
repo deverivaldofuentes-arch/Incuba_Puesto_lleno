@@ -23,7 +23,7 @@ Asegurate de tener instalado en tu sistema:
 
 ```bash
 git clone https://github.com/deverivaldofuentes-arch/Incuba_Puesto_lleno.git
-cd Puesto_lleno
+cd Incuba_Puesto_lleno
 ```
 
 ### Paso 2 - Copiar el archivo de entorno

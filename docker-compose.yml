@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: puesto_lleno_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=${DB_DATABASE:-puesto_lleno}
+      - DB_USERNAME=${DB_USERNAME:-puesto_lleno}
+      - DB_PASSWORD=${DB_PASSWORD:-puesto_lleno}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - puesto_lleno_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: puesto_lleno_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-puesto_lleno}
+      POSTGRES_USER: ${DB_USERNAME:-puesto_lleno}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-puesto_lleno}
+    ports:
+      - "${FORWARD_DB_PORT:-5432}:5432"
+    volumes:
+      - puesto_lleno_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-puesto_lleno} -d ${DB_DATABASE:-puesto_lleno}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - puesto_lleno_network
+
+volumes:
+  puesto_lleno_postgres_data:
+    driver: local
+
+networks:
+  puesto_lleno_network:
+    driver: bridge

@@ -49,19 +49,24 @@ docker compose up -d --build
 Este comando descarga las imagenes, construye el contenedor PHP y levanta la base de datos PostgreSQL.
 La primera vez puede tardar unos minutos dependiendo de tu conexion a internet.
 
-### Paso 4 - Generar clave de la aplicacion
+### Paso 4 - Instalar dependencias
+
+\\ash
+docker compose run --rm app composer install
+\
+### Paso 5 - Generar clave de la aplicacion
 
 ```bash
 docker compose exec app php artisan key:generate
 ```
 
-### Paso 5 - Ejecutar las migraciones
+### Paso 6 - Ejecutar las migraciones
 
 ```bash
 docker compose exec app php artisan migrate
 ```
 
-### Paso 6 - Verificar que funciona
+### Paso 7 - Verificar que funciona
 
 Abre tu navegador en: **http://localhost:8001**
 
